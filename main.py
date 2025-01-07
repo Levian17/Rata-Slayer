@@ -1,7 +1,7 @@
 import sys
 import pygame
 import time
-from pygame.locals import KEYDOWN, K_ESCAPE, K_w, K_a, K_s, K_d, K_RIGHT
+from pygame.locals import KEYDOWN, K_ESCAPE, K_w, K_a, K_s, K_d, K_RIGHT, K_LEFT
 
 # Settings basicos de pygame
 pygame.display.set_caption('Slasher Game')
@@ -14,12 +14,12 @@ last_time = 0
 current_time = 0
 
 class Entity(): # Clase entidad, posee una posicion, un tamaño y un sprite.
-    def __init__(self, pos: list, size: tuple, sprite_right, sprite_left):
+    def __init__(self, pos: list, size: tuple, sprite):
         self.pos = pos
         self.size = size
-        self.sprite = sprite_right
-        self.sprite_right = sprite_right
-        self.sprite_left = sprite_left
+        self.sprite = sprite
+        self.turned_left = False
+        self.sprite
         self.is_attacking = False
         self.frame = 0
 
@@ -41,26 +41,27 @@ class Entity(): # Clase entidad, posee una posicion, un tamaño y un sprite.
         elif self.frame == 4:
             self.frame = 0
             self.is_attacking = False
-            surface = self.sprite_right
+            soldier.sprite = pygame.image.load('soldier.png')
+            surface = self.sprite
         
         self.sprite = surface
 
-
     def draw(self):
-        screen.blit(self.sprite, self.pos)
+        sprite = self.sprite
+        if self.turned_left: 
+            sprite = pygame.transform.flip(sprite, flip_x=True, flip_y=False)
+        screen.blit(sprite, self.pos)
 
 # Inicializamos una entidad soldado y lo representamos en la pantalla.
-soldier = Entity([50, 50], (96, 96), pygame.image.load('soldier_right.png'), pygame.image.load('soldier_left.png'))
+soldier = Entity([50, 50], (96, 96), pygame.image.load('soldier.png'))
 soldier.sprite.set_clip()
 screen.blit(soldier.sprite, soldier.pos)
 
 while running: # Ciclo de juego
-
     current_time += 20
     if current_time >= animation_cooldown:
         current_time = 0
         if soldier.is_attacking: soldier.frame += 1
-
 
     for event in pygame.event.get(): # Controlador de eventos
         if event.type == pygame.QUIT: # Boton X
@@ -69,6 +70,10 @@ while running: # Ciclo de juego
             if event.key == K_ESCAPE:
                 running = False
             if event.key == K_RIGHT:
+                soldier.turned_left = False
+                soldier.is_attacking = True
+            if event.key == K_LEFT:
+                soldier.turned_left = True
                 soldier.is_attacking = True
 
     # Controlador de las teclas
@@ -78,11 +83,11 @@ while running: # Ciclo de juego
     if pressed_keys[K_w]:
         soldier.mover((0, -5))
     if pressed_keys[K_a]:
+        soldier.turned_left = True
         soldier.mover((-5, 0))
-        soldier.sprite = soldier.sprite_left
     if pressed_keys[K_d]:
+        soldier.turned_left = False
         soldier.mover((5, 0))
-        soldier.sprite = soldier.sprite_right
 
     # Controlador ataque
     if soldier.is_attacking:
