@@ -13,7 +13,7 @@ clock = pygame.time.Clock()
 # Generacion de entidades
 soldier = Soldado([50, 50], (96, 96))
 entities = []
-def enemy_generation(soldier, entities):
+def enemy_generation(entities):
     if randint(0, 50) == 0:
         entities.append(Entity([randint(100, 900), randint(100, 600)], (68, 60), pygame.image.load('assets/rata.png')))
 
@@ -58,6 +58,10 @@ while running: # Ciclo de juego
 
     # Refrescar pantalla
     screen.fill((30, 30, 30))
+
+    pygame.draw.circle(screen, (0, 0, 0), (100, 100), 50.0)
+    screen.blit(pygame.image.load("assets/engranaje.png"), (20, 20), (0, 0, 148, 156))
+
     # Representar soldado
     soldier.draw(screen)
     # Movimiento y representacion entidades
