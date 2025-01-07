@@ -1,6 +1,7 @@
 import sys
 import pygame
-from Entity import Soldado
+from random import randint
+from Entity import Entity, Soldado
 from pygame.locals import KEYDOWN, K_ESCAPE, K_w, K_a, K_s, K_d, K_RIGHT, K_LEFT
 
 # Settings basicos de pygame
@@ -9,10 +10,18 @@ screen = pygame.display.set_mode((1080, 720))
 running: bool = True
 clock = pygame.time.Clock()
 
-# Inicializamos una entidad soldado y lo representamos en la pantalla.
+# Generacion de entidades
 soldier = Soldado([50, 50], (96, 96))
+entities = []
+def enemy_generation(entities):
+    if randint(0, 100) == 0:
+        entities.append(Entity([randint(100, 900), randint(100, 600)], (96, 96), pygame.image.load('soldier.png')))
 
 while running: # Ciclo de juego
+
+    # Generacion de entidades
+    enemy_generation(entities)
+
     for event in pygame.event.get(): # Controlador de eventos
         if event.type == pygame.QUIT: # Boton X
             running = False            
@@ -21,9 +30,12 @@ while running: # Ciclo de juego
                 running = False
             if event.key == K_RIGHT:
                 soldier.turned_left = False
+                soldier.attack_hitbox = pygame.Rect(soldier.pos[0] + 65, soldier.pos[1] + 10, soldier.size[0] - 30, soldier.size[1])
                 soldier.is_attacking = True
+
             if event.key == K_LEFT:
                 soldier.turned_left = True
+                soldier.attack_hitbox = pygame.Rect(soldier.pos[0], soldier.pos[1] + 10, soldier.size[0] - 30, soldier.size[1])
                 soldier.is_attacking = True
 
     # Controlador movimiento
@@ -39,12 +51,16 @@ while running: # Ciclo de juego
         soldier.turned_left = False
         soldier.mover((5, 0))
 
-    # Controlador ataque
+    # Controlador animaciones
     soldier.update_animation()
+
+    # Controlador ataque
+    soldier.attack(entities)
 
     # Controlador de la pantalla
     screen.fill((0, 0, 0))
     soldier.draw(screen)
+    for entity in entities: entity.draw(screen)
     pygame.display.flip()
     clock.tick(60)
 
