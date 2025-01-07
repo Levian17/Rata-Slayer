@@ -15,12 +15,9 @@ soldier = Soldado([50, 50], (96, 96))
 entities = []
 def enemy_generation(entities):
     if randint(0, 100) == 0:
-        entities.append(Entity([randint(100, 900), randint(100, 600)], (96, 96), pygame.image.load('soldier.png')))
+        entities.append(Entity([randint(100, 900), randint(100, 600)], (96, 96), pygame.image.load('assets/soldier.png')))
 
 while running: # Ciclo de juego
-
-    # Generacion de entidades
-    enemy_generation(entities)
 
     for event in pygame.event.get(): # Controlador de eventos
         if event.type == pygame.QUIT: # Boton X
@@ -28,17 +25,19 @@ while running: # Ciclo de juego
         if event.type == KEYDOWN: # Controlador KEYDOWN
             if event.key == K_ESCAPE:
                 running = False
-            if event.key == K_RIGHT:
+            if event.key == K_RIGHT: # Arrow derecha
                 soldier.turned_left = False
                 soldier.attack_hitbox = pygame.Rect(soldier.pos[0] + 65, soldier.pos[1] + 10, soldier.size[0] - 30, soldier.size[1])
                 soldier.is_attacking = True
-
-            if event.key == K_LEFT:
+            if event.key == K_LEFT: # Arrow izquierda
                 soldier.turned_left = True
                 soldier.attack_hitbox = pygame.Rect(soldier.pos[0], soldier.pos[1] + 10, soldier.size[0] - 30, soldier.size[1])
                 soldier.is_attacking = True
 
-    # Controlador movimiento
+    # Generacion de entidades
+    enemy_generation(entities)
+
+    # Controlador movimiento (Mover a funcion ?)
     pressed_keys = pygame.key.get_pressed()    
     if pressed_keys[K_s]:
         soldier.mover((0, 5))
@@ -57,12 +56,20 @@ while running: # Ciclo de juego
     # Controlador ataque
     soldier.attack(entities)
 
-    # Controlador de la pantalla
+    # Refrescar pantalla
     screen.fill((0, 0, 0))
+    # Representar soldado
     soldier.draw(screen)
-    for entity in entities: entity.draw(screen)
+    # Movimiento y representacion entidades
+    for entity in entities: 
+        entity.track(soldier)
+        entity.draw(screen)
+
+    # Mostrar pantalla actualizada
     pygame.display.flip()
+    # Hacer que avance un frame
     clock.tick(60)
 
+# Finalizar la ejecucion
 pygame.quit()
 sys.exit()
