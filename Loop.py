@@ -3,6 +3,7 @@ import pygame
 import time
 from Objects.Soldado import Soldado
 from Controladores import entity_spawn, entity_despawn, keys_controller
+from Sound import play_music
 from pygame.locals import KEYDOWN, K_ESCAPE
 
 # Settings core de pygame
@@ -50,7 +51,7 @@ while running: # Ciclo de juego
 
     # Refrescar pantalla
     screen.fill((30, 30, 30))
-# 
+ 
     # Representar vida
     pygame.draw.rect(screen, (220, 165, 75), (50, 150-soldier.health, 90, soldier.health))
     screen.blit(font.render(str(soldier.health), False, (255, 255, 255)), (75, 75))

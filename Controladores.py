@@ -4,6 +4,7 @@ from random import choice, randint
 from Objects.Entity import Entity
 from Sound import play_sound
 
+# Genera las ratas
 def entity_spawn(entities, soldier, dificultad):
     if randint(0, 50 - dificultad) == 0:
         pos = [0, 0]
@@ -35,13 +36,15 @@ def entity_spawn(entities, soldier, dificultad):
             return True
     else:
         return False
-    
+
+# Elimina las ratas
 def entity_despawn(entities):
     for entity in entities: # Eliminamos las entidades que estan muertas
         if entity.health <= 0: 
             play_sound('flesh')
             entities.remove(entity)
 
+# Controla los inputs del teclado (key_pressed y key_down)
 def keys_controller(pressed_keys, events, soldier):
     # Pressed keys
     if pressed_keys[K_s]:
@@ -60,16 +63,13 @@ def keys_controller(pressed_keys, events, soldier):
     # Key downs
     for event in events:
         if event.type == KEYDOWN: # Controlador KEYDOWN    
-            if event.key == K_RIGHT: # Arrow derecha
+            if event.key == K_RIGHT or event.key == K_LEFT: # Arrows
                 if soldier.frame == 0: 
-                    soldier.turned_left = False
                     soldier.attack_hitbox = pygame.Rect(soldier.pos[0] + 65, soldier.pos[1] + 10, soldier.size[0] - 30, soldier.size[1])
                     soldier.is_attacking = True
                     play_sound('slash')
-                    
-            if event.key == K_LEFT: # Arrow izquierdasa
-                if soldier.frame == 0: 
-                    soldier.turned_left = True
-                    soldier.attack_hitbox = pygame.Rect(soldier.pos[0], soldier.pos[1] + 10, soldier.size[0] - 30, soldier.size[1])
-                    soldier.is_attacking = True
-                    play_sound('slash')
+
+                    if event.key == K_LEFT:
+                        soldier.turned_left = True
+                    elif event.key == K_RIGHT:
+                        soldier.turned_left = False
