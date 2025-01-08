@@ -1,9 +1,10 @@
 import pygame
-from pygame import K_w, K_a, K_s, K_d, K_SPACE
+from pygame import K_w, K_a, K_s, K_d, K_SPACE, KEYDOWN, K_RIGHT, K_LEFT
 from random import choice, randint
-from Entity import Entity
+from Objects.Entity import Entity
+from Sound import play_sound
 
-def enemy_generation(entities, soldier, dificultad):
+def entity_spawn(entities, soldier, dificultad):
     if randint(0, 50 - dificultad) == 0:
         pos = [0, 0]
         try:
@@ -35,16 +36,40 @@ def enemy_generation(entities, soldier, dificultad):
     else:
         return False
     
-def keys_controller(pressed_keys, soldier):
+def entity_despawn(entities):
+    for entity in entities: # Eliminamos las entidades que estan muertas
+        if entity.health <= 0: 
+            play_sound('flesh')
+            entities.remove(entity)
+
+def keys_controller(pressed_keys, events, soldier):
+    # Pressed keys
     if pressed_keys[K_s]:
         soldier.mover((0, soldier.speed))
     if pressed_keys[K_w]:
         soldier.mover((0, -soldier.speed))
     if pressed_keys[K_a]:
-        soldier.turned_left = True
+        if soldier.frame == 0: soldier.turned_left = True
         soldier.mover((-soldier.speed, 0))
     if pressed_keys[K_d]:
-        soldier.turned_left = False
+        if soldier.frame == 0: soldier.turned_left = False
         soldier.mover((soldier.speed, 0))
     if pressed_keys[K_SPACE]:
         soldier.dash()
+
+    # Key downs
+    for event in events:
+        if event.type == KEYDOWN: # Controlador KEYDOWN    
+            if event.key == K_RIGHT: # Arrow derecha
+                if soldier.frame == 0: 
+                    soldier.turned_left = False
+                    soldier.attack_hitbox = pygame.Rect(soldier.pos[0] + 65, soldier.pos[1] + 10, soldier.size[0] - 30, soldier.size[1])
+                    soldier.is_attacking = True
+                    play_sound('slash')
+                    
+            if event.key == K_LEFT: # Arrow izquierdasa
+                if soldier.frame == 0: 
+                    soldier.turned_left = True
+                    soldier.attack_hitbox = pygame.Rect(soldier.pos[0], soldier.pos[1] + 10, soldier.size[0] - 30, soldier.size[1])
+                    soldier.is_attacking = True
+                    play_sound('slash')

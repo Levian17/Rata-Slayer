@@ -1,24 +1,19 @@
 import sys
 import pygame
 import time
-from Entity import Soldado
-from Controladores import enemy_generation, keys_controller
-from pygame.locals import KEYDOWN, K_ESCAPE, K_RIGHT, K_LEFT
+from Objects.Soldado import Soldado
+from Controladores import entity_spawn, entity_despawn, keys_controller
+from pygame.locals import KEYDOWN, K_ESCAPE
 
 # Settings core de pygame
 screen = pygame.display.set_mode((1080, 720))
 running: bool = True
 clock = pygame.time.Clock()
 pygame.font.init()
-pygame.mixer.init()
 
 # Settings opcionales
 pygame.display.set_caption('Slasher Game')
 font = pygame.font.SysFont('Arial', 40,)
-slash = pygame.mixer.Sound("assets/slash.mp3")
-flesh = pygame.mixer.Sound("assets/flesh.mp3")
-slash.set_volume(0.2)
-flesh.set_volume(0.35)
 
 # Variables de logica
 contador_ratas = 0
@@ -29,36 +24,23 @@ soldier = Soldado([300, 300], (96, 96))
 entities = []
 
 while running: # Ciclo de juego
-
-    for event in pygame.event.get(): # Controlador de eventos
+    events = pygame.event.get()
+    for event in events: # Controladores de salida 
         if event.type == pygame.QUIT: # Boton X
-            running = False            
-        if event.type == KEYDOWN: # Controlador KEYDOWN
-            if event.key == K_ESCAPE:
-                running = False
-            if event.key == K_RIGHT: # Arrow derecha
-                soldier.turned_left = False
-                soldier.attack_hitbox = pygame.Rect(soldier.pos[0] + 65, soldier.pos[1] + 10, soldier.size[0] - 30, soldier.size[1])
-                soldier.is_attacking = True
-                pygame.mixer.Sound.play(slash)
-            if event.key == K_LEFT: # Arrow izquierdasa
-                soldier.turned_left = True
-                soldier.attack_hitbox = pygame.Rect(soldier.pos[0], soldier.pos[1] + 10, soldier.size[0] - 30, soldier.size[1])
-                soldier.is_attacking = True
-                pygame.mixer.Sound.play(slash)
-
-    for entity in entities: # Eliminamos las entidades que estan muertas
-        if entity.health <= 0: 
-            pygame.mixer.Sound.play(flesh)
-            entities.remove(entity)
-
-    # Generacion de entidades
-    if enemy_generation(entities, soldier, dificultad):
+            running = False
+        if event.type == KEYDOWN and event.key == K_ESCAPE: # Tecla ESC
+            running = False 
+        
+    # Despawneamos las entidades muertas
+    entity_despawn(entities)
+    
+    # Spawneamos nuevas entidades
+    if entity_spawn(entities, soldier, dificultad):
         contador_ratas += 1
         if contador_ratas % 10 == 0 and dificultad < 40: dificultad += 5
     
-    # Controlador movimiento (Mover a funcion ?)
-    keys_controller(pygame.key.get_pressed(), soldier)
+    # Controlador movimiento
+    keys_controller(pygame.key.get_pressed(), events, soldier)
 
     # Controlador animaciones
     soldier.update_animation()
@@ -68,7 +50,7 @@ while running: # Ciclo de juego
 
     # Refrescar pantalla
     screen.fill((30, 30, 30))
-
+# 
     # Representar vida
     pygame.draw.rect(screen, (220, 165, 75), (50, 150-soldier.health, 90, soldier.health))
     screen.blit(font.render(str(soldier.health), False, (255, 255, 255)), (75, 75))
