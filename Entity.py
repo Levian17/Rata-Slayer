@@ -6,6 +6,7 @@ class Entity(): # Clase general para representar entidades
         self.size = size
         self.sprite = sprite
         self.health = 10
+        self.speed = 1
         self.hitbox = pygame.Rect(pos[0], pos[1], size[0], size[1])
         self.turned_left = False
         self.frame = 0
@@ -31,15 +32,15 @@ class Entity(): # Clase general para representar entidades
 
     def track(self, entity): # Hace que la entidad se aproxime a otra entidad
         if entity.pos[0] > self.pos[0]:
-            self.mover((1, 0))
+            self.mover((self.speed, 0))
             self.turned_left = True
         if entity.pos[0] < self.pos[0]: 
-            self.mover((-1, 0))
+            self.mover((-self.speed, 0))
             self.turned_left = False
         if entity.pos[1] > self.pos[1]: 
-            self.mover((0, 1))
+            self.mover((0, self.speed))
         if entity.pos[1] < self.pos[1]: 
-            self.mover((0, -1))
+            self.mover((0, -self.speed))
         self.is_hitting(entity)
 
 
@@ -47,10 +48,12 @@ class Soldado(Entity):
     def __init__(self, pos, size):
         super().__init__(pos, size, pygame.image.load('assets/soldier.png'))
         self.health = 99
+        self.speed = 3
         self.animation_cooldown = 100
         self.last_time = 0
         self.current_time = 0
         self.is_attacking = False
+        self.dash_frames = 0
         self.hitbox = pygame.Rect(pos[0] + 30, pos[1] + 30, size[0] - 40, size[1] - 20)
         self.attack_hitbox = pygame.Rect(pos[0] + 65, pos[1] + 10, size[0] - 30, size[1])
 
@@ -70,6 +73,14 @@ class Soldado(Entity):
             self.attack_hitbox = pygame.Rect(self.pos[0], self.pos[1] + 10, self.size[0] - 30, self.size[1])
         else:
             self.attack_hitbox = pygame.Rect(self.pos[0] + 65, self.pos[1] + 10, self.size[0] - 30, self.size[1])
+
+    def dash(self):
+        if self.dash_frames == 0:
+            self.dash_frames = 5
+
+        if self.dash_frames > 0:
+            self.speed *= 3
+
     
     def draw(self, screen):  # Ajuste del metodo de entidad para que tambien represente la hitbox de ataque
         ''' Descomentar para ver las hitboxes '''
